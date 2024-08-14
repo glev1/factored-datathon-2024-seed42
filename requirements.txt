@@ -1,0 +1,4 @@
+tqdm==4.66.5
+datetime==5.5
+requests==2.32.3
+beautifulsoup4==4.12.3
