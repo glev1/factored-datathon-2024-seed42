@@ -7,8 +7,16 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 
-url = "http://data.gdeltproject.org/gkg/index.html"
-download_url = "http://data.gdeltproject.org/gkg/"
+urls = [
+    "http://data.gdeltproject.org/gkg/index.html",
+    "http://data.gdeltproject.org/events/index.html"
+]
+download_urls = [
+    "http://data.gdeltproject.org/gkg/",
+    "http://data.gdeltproject.org/events/"
+]   
+
+pattern = re.compile(r'(\d{8})\.(gkg(?:counts)?|export)\.(csv|CSV)\.zip')
 
 # Function to check if a date is within the specified range
 def is_within_date_range(
@@ -23,46 +31,48 @@ def get_urls(
         start_date: datetime = datetime(2024,8,10),
         end_date: datetime = datetime(2024,8,13),
     )-> list[str]:
-
-    # Send a GET request to the GDELT GKG website
-    response = requests.get(url)
-
     # Define a regular expression to match the required formats
     # YYYYMMDD.gkg.csv.zip or YYYYMMDD.gkgcounts.csv.zip
-    pattern = re.compile(r'\d{8}\.gkg(?:counts)?\.csv\.zip')
 
     filtered_urls = []
-    if response.status_code == 200:
-        # Parse the HTML content using BeautifulSoup 
-        # (https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
-        soup = BeautifulSoup(response.content, 'html.parser')
-        
-        # Find all links on the page
-        print("Discovering links...")
-        links = soup.find_all('a')
+    for i in range(2):
+        url = urls[i]
+        download_url = download_urls[i]
 
-        # Filter links that match the specified formats and date range
-        inside_range = False
-        # Number of files to be fetched (2 per day, including start and end date)
-        total_files = ((end_date - start_date).days + 1)*2
-        bar = tqdm(desc="Filtering urls", total=total_files, ncols=100)
-        for link in links:
-            href = link.get('href')
-            if href:
-                match = pattern.search(href)
-                if match:
-                    date_str = match.string.split(".")[0]
-                    if is_within_date_range(date_str, start_date, end_date):
-                        filtered_urls.append(f"{download_url}{href}")
-                        inside_range = True
-                        bar.update(1)
-                    else:
-                        # Break for loop once it lefts the specified date range
-                        if inside_range: break
-                 
-    else:
-        print(f"Failed to get index. Status code: {response.status_code}")
-    
+        # Send a GET request to the GDELT GKG website
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            # Parse the HTML content using BeautifulSoup 
+            # (https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Find all links on the page
+            print("Discovering links...")
+            links = soup.find_all('a')
+
+            # Filter links that match the specified formats and date range
+            inside_range = False
+            # Number of files to be fetched (2 per day, including start and end date)
+            total_files = ((end_date - start_date).days + 1)*2
+            bar = tqdm(desc="Filtering urls", total=total_files, ncols=100)
+            for link in links:
+                href = link.get('href')
+                if href:
+                    match = pattern.search(href)
+                    if match:
+                        date_str = match.string.split(".")[0]
+                        if is_within_date_range(date_str, start_date, end_date):
+                            filtered_urls.append(f"{download_url}{href}")
+                            inside_range = True
+                            bar.update(1)
+                        else:
+                            # Break for loop once it lefts the specified date range
+                            if inside_range: break
+                    
+        else:
+            print(f"Failed to get index. Status code: {response.status_code}")
+        
     return filtered_urls
 
 def download_file(url: str, file_path: str, file_name: str):
