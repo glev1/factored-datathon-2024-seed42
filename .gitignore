@@ -5,3 +5,4 @@
 *.pyc
 .venv/*
 notebooks/spark-warehouse/*
+!files/cameo.csv
