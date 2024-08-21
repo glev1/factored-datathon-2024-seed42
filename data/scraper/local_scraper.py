@@ -1,4 +1,5 @@
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
 from utils import download_files, get_urls, add_col_to_event_data
@@ -6,10 +7,15 @@ import os
 
 def list_files_recursive(directory):
     file_list = []
-    for root, dirs, files in os.walk(directory):
+    for root, _, files in os.walk(directory):
         for file in files:
             file_list.append(os.path.join(root, file))
     return file_list
+
+
+def process_file(file_path):
+        if file_path.endswith('.export.CSV'):
+            add_col_to_event_data(file_path)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Short sample app')
@@ -22,6 +28,5 @@ if __name__ == "__main__":
     download_files(urls)
 
     file_list = list_files_recursive('./files')
-    for f in file_list:
-        if f.endswith('.export.CSV'):
-            add_col_to_event_data(f)
+    with ThreadPoolExecutor() as executor:
+        executor.map(process_file, file_list)
