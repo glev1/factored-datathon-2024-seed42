@@ -2,3 +2,7 @@
 *.CSV
 *.zip
 *__pycache__*
+*.pyc
+.venv/*
+notebooks/spark-warehouse/*
+!files/cameo.csv
