@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 import re
 import os
 import zipfile
@@ -99,19 +100,29 @@ def unzip_file(file_path, folder_name):
         zip_ref.extractall(folder_name)
     os.remove(file_path)
 
-def download_files(urls: list[str]=[]):
-    bar = tqdm(desc="Downloanding files", total=len(urls), ncols=100)
-    for url in urls:
-        file_name = url.split("/")[-1]
-        date_str = file_name.split(".")[0]
-        folder_name = f"./files/{date_str}"
-        if not os.path.exists(folder_name):
-            os.makedirs(folder_name)
+def download_and_unzip(url):
+    file_name = url.split("/")[-1]
+    date_str = file_name.split(".")[0]
+    folder_name = f"./files/{date_str}"
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
 
-        file_path = os.path.join(folder_name, file_name)
+    file_path = os.path.join(folder_name, file_name)
+    
+    # Check if the file already exists
+    if not os.path.exists(file_path):
         download_file(url, file_path, file_name)
         unzip_file(file_path, folder_name)
-        bar.update(1)
+    else:
+        print(f"File {file_name} already exists, skipping download.")
+    
+    return url
+
+def download_files(urls: list[str]=[]):
+    with ThreadPoolExecutor() as executor:
+        futures = [executor.submit(download_and_unzip, url) for url in urls]
+        for future in futures:
+            future.result()
     return
 
 def add_col_to_event_data(event_data_file: str, col_names: list[str] = [
