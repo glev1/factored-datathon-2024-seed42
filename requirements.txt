@@ -12,3 +12,4 @@ langchain-mistralai==0.1.12
 langchain-openai==0.1.22
 huggingface_hub==0.24.5
 langchain-huggingface==0.0.3
+streamlit==1.37.1
