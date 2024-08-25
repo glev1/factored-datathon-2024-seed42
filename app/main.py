@@ -20,7 +20,7 @@ async def login(form_data: dict):
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the ML API"}
-
+  
 @app.post("/predict", dependencies=[Depends(verify_token)])
 async def make_prediction(request: dict):
     input_data = request
