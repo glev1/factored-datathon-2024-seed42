@@ -1,23 +1,37 @@
 import os
 import jwt
+import bcrypt
 from datetime import datetime, timedelta
 from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
+from database import get_db_connection
 
+# JWT Configuration
 SECRET_KEY = os.getenv("AUTH_SECRET_KEY") #TODO get from secret manager
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# OAuth2PasswordBearer instance for dependency injection
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-# Pydantic model for the token response
 class Token(BaseModel):
     access_token: str
     token_type: str
 
-# Function to create JWT token
+async def authenticate_user(username: str, password: str):
+    conn = await get_db_connection()
+    user = await conn.fetchrow("SELECT * FROM users WHERE username = $1", username)
+    await conn.close()
+
+    if user is None:
+        return False
+
+    # Validate the password
+    if not bcrypt.checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):
+        return False
+
+    return user
+
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     if expires_delta:
@@ -28,7 +42,6 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-# Function to verify JWT token
 def verify_token(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -37,3 +50,21 @@ def verify_token(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="Token has expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
+    
+
+def hash_password(password: str) -> str:
+    
+	import bcrypt
+	hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+	
+	return hashed_password.decode('utf-8')
+
+
+if __name__ == "__main__":
+    
+	my_pass = "mypass1234"
+     
+	hashed_pass = hash_password(my_pass)
+
+	print(hashed_pass) 
+
