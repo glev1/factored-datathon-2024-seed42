@@ -1,8 +1,8 @@
-# Factored Datathon 2024
+# Factored Datathon 2024 - Risk Assessement in Sanction Analysis
 
 ## Overview
 
-The Factored Datathon 2024 project aims to delve into GDELT events data, specifically focusing on sanctions-related events. This repository includes Exploratory Data Analysis (EDA) notebooks, machine learning models, and Streamlit applications.
+The Factored Datathon 2024 project aims to delve into GDELT events data, specifically focusing on sanctions-related events for Risk Assessement. This repository includes Exploratory Data Analysis (EDA) notebooks, machine learning models, and Streamlit applications.
 
 [Executive Summary](docs/GDELT_Project.pdf)
 
