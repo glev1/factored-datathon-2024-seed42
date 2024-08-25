@@ -10,14 +10,16 @@ The Factored Datathon 2024 project aims to delve into GDELT events data, specifi
 
 - **Data Handling**: Packages designed to efficiently manage large volumes of data using Spark.
 - **Data Analysis**: Notebooks and packages for data cleaning, merging, and analysis.
-- **Machine Learning**: Models developed to predict the Goldenstein Scale.
-- **Streamlit Application**: An app that integrates LLM models with Agents, Tools, and RAG to interact with the data.
+- **Machine Learning for Goldenstein Scale Prediciton**: Model developed to predict the Goldenstein Scale and delivered via API.
+- **Streamlit Application**: A Streamlit app that integrates LLM models with Agents, Tools, and RAG to interact with the data.
 
 ### Infrastructure
 
 Although this project does not include full infrastructure implementation and only provides a simple local version using Streamlit and Spark, the proposed infrastructure for cloud deployment (using AWS as an example) is outlined below:
 
 ![Proposed Infrastructure](docs/infrastructure.png)
+
+Also, for the Goldenstein Scale Prediction model, we delivery an API that contains Authentication and all the required methods to train and predict using our model.
 
 ## Local Installation
 
@@ -44,12 +46,22 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+### Using Docker for the API
+To set up the project and trigger the API service:
+
+```bash
+docker build -t <image-name>:<tag> <path-to-dockerfile>
+docker run --name <container-name> -d <image-name>:<tag>
+```
+
+The default application port is 8000.
+
 ## Structure and Usage
 ### EDA Files
 The EDA notebooks are available at [notebooks/sanction_analysis.ipynb](notebooks/sanction_analysis.ipynb).
 
-### Goldenstein Scale Predictor
-Details about the Goldenstein Scale Predictor are coming soon.
+### Goldenstein Scale Predictor API
+The [Goldstein Scale Predictor API](https://github.com/glev1/factored-datathon-2024-seed42/blob/main/app/main.py) leverages a GBTRegressor model to predict the Goldstein Scale. It includes all necessary data preprocessing and offers a `/predict` endpoint for users to submit new data and receive predictions. Additionally, the API supports user authentication via a `/token` endpoint, connecting to a local database of registered users to ensure secure access to the prediction model.
 
 ### Streamlit Application
 To run the Streamlit application, you need to set your OpenAI API key. This project uses GPT-4 and currently does not support other LLM models, so an API key is required.
