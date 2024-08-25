@@ -1,11 +1,7 @@
 from fastapi import FastAPI, Request
-from app.model import load_model, predict
-from app.utils import preprocess, postprocess
+from app.utils import preprocess, postprocess, predict
 
 app = FastAPI()
-
-# Load the model when the application starts
-model = load_model()
 
 @app.get("/")
 def read_root():
@@ -15,6 +11,6 @@ def read_root():
 async def make_prediction(request: Request):
     input_data = await request.json()
     processed_data = preprocess(input_data)
-    prediction = predict(model, processed_data)
+    prediction = predict(processed_data)
     result = postprocess(prediction)
     return result
